@@ -1,14 +1,10 @@
-# 🚀 CI Setup for aitdevops
+# 🚀 CI Setup for aitdevops-site
 
-Welcome to the repository that manages CI workflows for the `aitdevops` project. This repository contains configurations for different CI tools, including GitHub Actions, CircleCI, Travis CI, and Jenkins. These workflows automate the process of building, testing, and deploying your application.
+Welcome to the repository that manages CI workflows for the `aitdevops` project. This repository contains configurations for GitHub Actions. These workflows automate the process of building, pushing the docker image to artifact registry and update Helm values..
 
 ## 📂 Repository Structure
 
-- `github-actions/` - Contains GitHub Actions workflows for building and deploying the application.
-- `circleci/` - Placeholder for CircleCI configuration files.
-- `travis/` - Placeholder for Travis CI configuration files.
-- `jenkins/` - Placeholder for Jenkins pipeline configurations.
-- `docs/` - Documentation and guides related to CI/CD processes.
+- `.github/workflows/` - Contains GitHub Actions workflows for building and pushing the docker image to artifact registry and update Helm values.
 
 ## 🛠️ CI Tools Overview
 
