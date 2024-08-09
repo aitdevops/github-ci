@@ -5,6 +5,11 @@ Welcome to the repository that manages CI workflows for the `aitdevops` project.
 ## 📂 Repository Structure
 
 - `.github/workflows/` - Contains GitHub Actions workflows for building and pushing the docker image to artifact registry and update Helm values.
+- In the next phase ArgoCD will deploy the images built by CI.
+
+**Clone the repository FOR CD**:
+   ```sh
+   git clone https://github.com/aitdevops/argo-cd.git
 
 ## 🛠️ CI Tools Overview
 
