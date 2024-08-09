@@ -1,9 +1,8 @@
- name: Build and Push Frontend Image, Update Helm Values
+name: Build and Push Frontend Image, Update Helm Values
 
 on:
-  push:
-    branches:
-      - main
+  repository_dispatch:
+    types: [frontend_push]
 
 jobs:
   build-and-deploy:
@@ -13,9 +12,9 @@ jobs:
       - name: Checkout frontend code
         uses: actions/checkout@v2
         with:
-          repository: aitdevops/frontend  # Specify the frontend repository
+          repository: aitdevops/frontend
           token: ${{ secrets.GH_TOKEN }}
-          path: frontend  # Checkout the frontend code into a subdirectory
+          path: frontend
 
       - name: Set up Google Cloud auth
         uses: google-github-actions/auth@v1
