@@ -1,4 +1,4 @@
-name: Build and Push backend Image, Update Helm Values
+name: Build and Push Backend Images, Update Helm Values
 
 on:
   repository_dispatch:
@@ -30,11 +30,23 @@ jobs:
       - name: Configure Docker for GCP
         run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
-      - name: Build and push backend image
+      - name: Build and push approval-service image
         run: |
-          IMAGE_TAG=${GITHUB_SHA::7}
-          docker build -t us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/backend:$IMAGE_TAG -f backend/backend/Dockerfile ./backend/backend
-          docker push us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/backend:$IMAGE_TAG
+          IMAGE_TAG=${GITHUB_SHA::7}-approval
+          docker build -t us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/approval-service:$IMAGE_TAG -f backend/approval-service/Dockerfile backend/approval-service
+          docker push us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/approval-service:$IMAGE_TAG
+
+      - name: Build and push auth-service image
+        run: |
+          IMAGE_TAG=${GITHUB_SHA::7}-auth
+          docker build -t us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/auth-service:$IMAGE_TAG -f backend/auth-service/Dockerfile backend/auth-service
+          docker push us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/auth-service:$IMAGE_TAG
+
+      - name: Build and push user-service image
+        run: |
+          IMAGE_TAG=${GITHUB_SHA::7}-user
+          docker build -t us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/user-service:$IMAGE_TAG -f backend/user-service/Dockerfile backend/user-service
+          docker push us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/user-service:$IMAGE_TAG
 
       - name: Configure git
         run: |
@@ -47,15 +59,24 @@ jobs:
           cd argocd
           git checkout main
 
-      - name: Update Helm values
+      - name: Update Helm values for approval-service
         run: |
-          IMAGE_TAG=${GITHUB_SHA::7}
-          cd argocd
-          sed -i 's|tag:.*|tag: '$IMAGE_TAG'|g' charts/aitdevops-backend/values.yaml
+          sed -i 's|approvalServiceTag:.*|approvalServiceTag: '${GITHUB_SHA::7}-approval'|g' charts/aitdevops-backend/values.yaml
           git add charts/aitdevops-backend/values.yaml
-          git commit -m "Update backend image to $IMAGE_TAG"
+          git commit -m "Update approval-service image to ${GITHUB_SHA::7}-approval"
+
+      - name: Update Helm values for auth-service
+        run: |
+          sed -i 's|authServiceTag:.*|authServiceTag: '${GITHUB_SHA::7}-auth'|g' charts/aitdevops-backend/values.yaml
+          git add charts/aitdevops-backend/values.yaml
+          git commit -m "Update auth-service image to ${GITHUB_SHA::7}-auth"
+
+      - name: Update Helm values for user-service
+        run: |
+          sed -i 's|userServiceTag:.*|userServiceTag: '${GITHUB_SHA::7}-user'|g' charts/aitdevops-backend/values.yaml
+          git add charts/aitdevops-backend/values.yaml
+          git commit -m "Update user-service image to ${GITHUB_SHA::7}-user"
 
       - name: Push changes
         run: |
-          cd argocd
           git push https://${{ secrets.GH_TOKEN }}@github.com/aitdevops/argocd.git main
