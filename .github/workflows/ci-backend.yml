@@ -61,18 +61,21 @@ jobs:
 
       - name: Update Helm values for approval-service
         run: |
+          cd argocd
           sed -i 's|approvalServiceTag:.*|approvalServiceTag: '${GITHUB_SHA::7}-approval'|g' charts/aitdevops-backend/values.yaml
           git add charts/aitdevops-backend/values.yaml
           git commit -m "Update approval-service image to ${GITHUB_SHA::7}-approval"
 
       - name: Update Helm values for auth-service
         run: |
+          cd argocd
           sed -i 's|authServiceTag:.*|authServiceTag: '${GITHUB_SHA::7}-auth'|g' charts/aitdevops-backend/values.yaml
           git add charts/aitdevops-backend/values.yaml
           git commit -m "Update auth-service image to ${GITHUB_SHA::7}-auth"
 
       - name: Update Helm values for user-service
         run: |
+          cd argocd
           sed -i 's|userServiceTag:.*|userServiceTag: '${GITHUB_SHA::7}-user'|g' charts/aitdevops-backend/values.yaml
           git add charts/aitdevops-backend/values.yaml
           git commit -m "Update user-service image to ${GITHUB_SHA::7}-user"
