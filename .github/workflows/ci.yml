@@ -32,8 +32,9 @@ jobs:
 
       - name: Build and push frontend image
         run: |
-          docker build -t us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/frontend:${{ github.sha }} -f frontend/frontend/Dockerfile ./frontend/frontend
-          docker push us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/frontend:${{ github.sha }}
+          IMAGE_TAG=${GITHUB_SHA::7}
+          docker build -t us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/frontend:$IMAGE_TAG -f frontend/frontend/Dockerfile ./frontend/frontend
+          docker push us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/frontend:$IMAGE_TAG
 
       - name: Configure git
         run: |
@@ -48,10 +49,10 @@ jobs:
 
       - name: Update Helm values
         run: |
-          cd argocd
-          sed -i 's|tag:.*|tag: '${{ github.sha }}'|g' charts/aitdevops-site/values.yaml
+          IMAGE_TAG=${GITHUB_SHA::7}
+          sed -i 's|tag:.*|tag: '$IMAGE_TAG'|g' charts/aitdevops-site/values.yaml
           git add charts/aitdevops-site/values.yaml
-          git commit -m "Update frontend image to ${{ github.sha }}"
+          git commit -m "Update frontend image to $IMAGE_TAG"
 
       - name: Push changes
         run: |
