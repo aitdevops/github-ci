@@ -63,24 +63,24 @@ jobs:
         run: |
           cd argocd
           IMAGE_TAG=${GITHUB_SHA::7}-approval
-          sed -i '/repository: us-central1-docker.pkg.dev\/aitdevops8\/aitdevops-gke\/approval/{n;s/tag:.*/tag: '$IMAGE_TAG'/}' charts/aitdevops-backend/values.yaml
-          git add charts/aitdevops-backend/values.yaml
+          sed -i '/repository: us-central1-docker.pkg.dev\/aitdevops8\/aitdevops-gke\/approval/{n;s/tag:.*/tag: '$IMAGE_TAG'/}' charts/approval-service/values.yaml
+          git add charts/approval-service/values.yaml
           git commit -m "Update approval-service image to $IMAGE_TAG"
 
       - name: Update Helm values for auth-service
         run: |
           cd argocd
           IMAGE_TAG=${GITHUB_SHA::7}-auth
-          sed -i '/repository: us-central1-docker.pkg.dev\/aitdevops8\/aitdevops-gke\/auth/{n;s/tag:.*/tag: '$IMAGE_TAG'/}' charts/aitdevops-backend/values.yaml
-          git add charts/aitdevops-backend/values.yaml
+          sed -i '/repository: us-central1-docker.pkg.dev\/aitdevops8\/aitdevops-gke\/auth/{n;s/tag:.*/tag: '$IMAGE_TAG'/}' charts/auth-service/values.yaml
+          git add charts/auth-service/values.yaml
           git commit -m "Update auth-service image to $IMAGE_TAG"
 
       - name: Update Helm values for user-service
         run: |
           cd argocd
           IMAGE_TAG=${GITHUB_SHA::7}-user
-          sed -i '/repository: us-central1-docker.pkg.dev\/aitdevops8\/aitdevops-gke\/user/{n;s/tag:.*/tag: '$IMAGE_TAG'/}' charts/aitdevops-backend/values.yaml
-          git add charts/aitdevops-backend/values.yaml
+          sed -i '/repository: us-central1-docker.pkg.dev\/aitdevops8\/aitdevops-gke\/user/{n;s/tag:.*/tag: '$IMAGE_TAG'/}' charts/user-service/values.yaml
+          git add charts/user-service/values.yaml
           git commit -m "Update user-service image to $IMAGE_TAG"
         
       - name: Push changes

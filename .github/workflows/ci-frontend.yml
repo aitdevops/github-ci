@@ -51,8 +51,8 @@ jobs:
         run: |
           IMAGE_TAG=${GITHUB_SHA::7}
           cd argocd
-          sed -i 's|tag:.*|tag: '$IMAGE_TAG'|g' charts/aitdevops-site/values.yaml
-          git add charts/aitdevops-site/values.yaml
+          sed -i 's|tag:.*|tag: '$IMAGE_TAG'|g' charts/frontend/values.yaml
+          git add charts/frontend/values.yaml
           git commit -m "Update frontend image to $IMAGE_TAG"
 
       - name: Push changes
