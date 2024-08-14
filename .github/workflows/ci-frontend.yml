@@ -49,6 +49,7 @@ jobs:
 
       - name: Update Helm values
         run: |
+          cd argocd
           IMAGE_TAG=${{ github.event.client_payload.sha }}
           sed -i 's|tag:.*|tag: '$IMAGE_TAG'|g' charts/frontend/values.yaml
           git add charts/frontend/values.yaml
