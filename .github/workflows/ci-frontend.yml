@@ -48,7 +48,7 @@ jobs:
           git checkout main
 
 
-        - name: Update kubernetes manifest file
+      - name: Update kubernetes manifest file
         run: |
           cd argocd
           IMAGE_TAG=${{ github.event.client_payload.sha }}
