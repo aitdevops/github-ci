@@ -52,7 +52,7 @@ jobs:
         run: |
           cd argocd
           IMAGE_TAG=${{ github.event.client_payload.sha }}
-          sed -i 's|tag:.*|tag: '$IMAGE_TAG'|g' frontend/deployment.yaml
+          sed -i 's|image:.*|image: "us-central1-docker.pkg.dev/aitdevops8/aitdevops-gke/aitdevops-site:'$IMAGE_TAG'"|g' frontend/deployment.yaml
           git add frontend/deployment.yaml
           git commit -m "Update frontend image to $IMAGE_TAG"
 
