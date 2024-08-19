@@ -1,4 +1,4 @@
-name: Build and Push Backend Images, Update Helm Values
+name: Build and Push Backend Images, Update Kubernetes Manifests
 
 on:
   repository_dispatch:
@@ -59,28 +59,28 @@ jobs:
           cd argocd
           git checkout main
 
-      - name: Update Helm values for approval-service
+      - name: Update Kubernetes manifests for approval-service
         run: |
           cd argocd
           IMAGE_TAG=${{ github.event.client_payload.sha }}-approval
-          sed -i '/repository: us-central1-docker.pkg.dev\/aitdevops8\/aitdevops-gke\/approval/{n;s/tag:.*/tag: '$IMAGE_TAG'/}' charts/approval-service/values.yaml
-          git add charts/approval-service/values.yaml
+          sed -i 's|image: us-central1-docker.pkg.dev/aitdevops8/aitdevops-gke/approval-service:.*|image: us-central1-docker.pkg.dev/aitdevops8/aitdevops-gke/approval-service:'$IMAGE_TAG'|g' backend/approval-service/deployment.yaml
+          git add backend/approval-service/deployment.yaml
           git commit -m "Update approval-service image to $IMAGE_TAG"
 
-      - name: Update Helm values for auth-service
+      - name: Update Kubernetes manifests for auth-service
         run: |
           cd argocd
           IMAGE_TAG=${{ github.event.client_payload.sha }}-auth
-          sed -i '/repository: us-central1-docker.pkg.dev\/aitdevops8\/aitdevops-gke\/auth/{n;s/tag:.*/tag: '$IMAGE_TAG'/}' charts/auth-service/values.yaml
-          git add charts/auth-service/values.yaml
+          sed -i 's|image: us-central1-docker.pkg.dev/aitdevops8/aitdevops-gke/auth-service:.*|image: us-central1-docker.pkg.dev/aitdevops8/aitdevops-gke/auth-service:'$IMAGE_TAG'|g' backend/auth-service/deployment.yaml
+          git add backend/auth-service/deployment.yaml
           git commit -m "Update auth-service image to $IMAGE_TAG"
 
-      - name: Update Helm values for user-service
+      - name: Update Kubernetes manifests for user-service
         run: |
           cd argocd
           IMAGE_TAG=${{ github.event.client_payload.sha }}-user
-          sed -i '/repository: us-central1-docker.pkg.dev\/aitdevops8\/aitdevops-gke\/user/{n;s/tag:.*/tag: '$IMAGE_TAG'/}' charts/user-service/values.yaml
-          git add charts/user-service/values.yaml
+          sed -i 's|image: us-central1-docker.pkg.dev/aitdevops8/aitdevops-gke/user-service:.*|image: us-central1-docker.pkg.dev/aitdevops8/aitdevops-gke/user-service:'$IMAGE_TAG'|g' backend/user-service/deployment.yaml
+          git add backend/user-service/deployment.yaml
           git commit -m "Update user-service image to $IMAGE_TAG"
 
       - name: Push changes
