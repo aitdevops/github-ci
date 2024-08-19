@@ -51,9 +51,17 @@ jobs:
         run: |
           cd argocd
           IMAGE_TAG=${{ github.event.client_payload.sha }}
+          echo "Updating image tag to: $IMAGE_TAG"
           sed -i 's|image: us-central1-docker.pkg.dev/aitdevops8/aitdevops-gke/frontend:.*|image: us-central1-docker.pkg.dev/aitdevops8/aitdevops-gke/frontend:'$IMAGE_TAG'|g' frontend/deployment.yaml
           git add frontend/deployment.yaml
-          git commit -m "Update frontend image to $IMAGE_TAG"
+
+          # Check if there are any changes to commit
+          if git diff-index --quiet HEAD; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update frontend image to $IMAGE_TAG"
+            git push https://${{ secrets.GH_TOKEN }}@github.com/aitdevops/argocd.git main
+          fi
 
       - name: Push changes
         run: |
