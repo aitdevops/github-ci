@@ -63,7 +63,7 @@ jobs:
         run: |
           cd argocd
           IMAGE_TAG=${{ github.event.client_payload.sha }}-approval
-          sed -i 's|image:.*|image: "us-central1-docker.pkg.dev/aitdevops8/aitdevops-gke/approval-service:'$IMAGE_TAG'"|g' backend/approval-service/deployment.yaml
+          sed -i 's|image:.*|image: "us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/approval-service:'$IMAGE_TAG'"|g' backend/approval-service/deployment.yaml
           git add backend/approval-service/deployment.yaml
           git commit -m "Update approval-service image to $IMAGE_TAG"
 
@@ -71,7 +71,7 @@ jobs:
         run: |
           cd argocd
           IMAGE_TAG=${{ github.event.client_payload.sha }}-auth
-          sed -i 's|image:.*|image: "us-central1-docker.pkg.dev/aitdevops8/aitdevops-gke/auth-service:'$IMAGE_TAG'"|g' backend/auth-service/deployment.yaml
+          sed -i 's|image:.*|image: "us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/auth-service:'$IMAGE_TAG'"|g' backend/auth-service/deployment.yaml
           git add backend/auth-service/deployment.yaml
           git commit -m "Update auth-service image to $IMAGE_TAG"
 
@@ -79,7 +79,7 @@ jobs:
         run: |
           cd argocd
           IMAGE_TAG=${{ github.event.client_payload.sha }}-user
-          sed -i 's|image:.*|image: "us-central1-docker.pkg.dev/aitdevops8/aitdevops-gke/user-service:'$IMAGE_TAG'"|g' backend/user-service/deployment.yaml
+          sed -i 's|image:.*|image: "us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/aitdevops-gke/user-service:'$IMAGE_TAG'"|g' backend/user-service/deployment.yaml
           git add backend/user-service/deployment.yaml
           git commit -m "Update user-service image to $IMAGE_TAG"
 
