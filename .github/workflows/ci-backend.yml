@@ -4,6 +4,10 @@ on:
   repository_dispatch:
     types: [backend_push]
 
+permissions:
+  id-token: write  # This is required for Workload Identity Federation
+  contents: read   # This is necessary for actions/checkout and other read operations
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
