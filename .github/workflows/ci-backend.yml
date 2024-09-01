@@ -19,7 +19,8 @@ jobs:
       - name: Set up Google Cloud auth
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}  # Use the workload identity provider
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}  # Use the service account email
 
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
