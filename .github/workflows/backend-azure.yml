@@ -8,7 +8,7 @@ permissions:
   contents: read   # Necessary for actions/checkout and other read operations
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -47,3 +47,43 @@ jobs:
           IMAGE_TAG=$(date +%Y%m%d%H%M%S)-user  # Generate a unique image tag based on the current date and time
           docker build -t aitdevops.azurecr.io/user-service:$IMAGE_TAG -f backend/user-service/Dockerfile backend/user-service
           docker push aitdevops.azurecr.io/user-service:$IMAGE_TAG
+
+      - name: Configure git
+        run: |
+          git config --global user.email "rajeevkoppisetti21@gmail.com"
+          git config --global user.name "aitdevops"
+
+      - name: Clone ArgoCD repo
+        run: |
+          git clone https://${{ secrets.GH_TOKEN }}@github.com/aitdevops/argocd.git
+          cd argocd
+          git checkout main
+
+      - name: Update Kubernetes manifests for approval-service
+        run: |
+          cd argocd
+          IMAGE_TAG=$(date +%Y%m%d%H%M%S)-approval
+          sed -i 's|image:.*|image: "aitdevops.azurecr.io/approval-service:'$IMAGE_TAG'"|g' azure/backend/approval-service/deployment.yaml
+          git add azure/backend/approval-service/deployment.yaml
+          git commit -m "Update approval-service image to $IMAGE_TAG"
+
+      - name: Update Kubernetes manifests for auth-service
+        run: |
+          cd argocd
+          IMAGE_TAG=$(date +%Y%m%d%H%M%S)-auth
+          sed -i 's|image:.*|image: "aitdevops.azurecr.io/auth-service:'$IMAGE_TAG'"|g' azure/backend/auth-service/deployment.yaml
+          git add azure/backend/auth-service/deployment.yaml
+          git commit -m "Update auth-service image to $IMAGE_TAG"
+
+      - name: Update Kubernetes manifests for user-service
+        run: |
+          cd argocd
+          IMAGE_TAG=$(date +%Y%m%d%H%M%S)-user
+          sed -i 's|image:.*|image: "aitdevops.azurecr.io/user-service:'$IMAGE_TAG'"|g' azure/backend/user-service/deployment.yaml
+          git add azure/backend/user-service/deployment.yaml
+          git commit -m "Update user-service image to $IMAGE_TAG"
+
+      - name: Push changes
+        run: |
+          cd argocd
+          git push https://${{ secrets.GH_TOKEN }}@github.com/aitdevops/argocd.git main

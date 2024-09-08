@@ -35,3 +35,27 @@ jobs:
           IMAGE_TAG=$(date +%Y%m%d%H%M%S)  # Generate a unique image tag based on the current date and time
           docker build -t aitdevops.azurecr.io/frontend:$IMAGE_TAG -f frontend/frontend/Dockerfile ./frontend/frontend  # Builds the Docker image for the frontend
           docker push aitdevops.azurecr.io/frontend:$IMAGE_TAG  # Pushes the Docker image to Azure Container Registry
+
+      - name: Configure git
+        run: |
+          git config --global user.email "rajeevkoppisetti21@gmail.com"
+          git config --global user.name "aitdevops"  # Configures Git with the user's name and email for committing changes
+
+      - name: Clone argocd repo
+        run: |
+          git clone https://${{ secrets.GH_TOKEN }}@github.com/aitdevops/argocd.git  # Clones the ArgoCD repository
+          cd argocd
+          git checkout main  # Checks out the 'main' branch
+
+      - name: Update Kubernetes manifest file
+        run: |
+          cd argocd
+          IMAGE_TAG=$(date +%Y%m%d%H%M%S)  # Uses the generated image tag
+          sed -i 's|image:.*|image: "aitdevops.azurecr.io/frontend:'$IMAGE_TAG'"|g' azure/frontend/deployment.yaml  # Updates the Docker image tag in the Kubernetes manifest
+          git add azure/frontend/deployment.yaml
+          git commit -m "Update frontend image to $IMAGE_TAG"  # Commits the changes to the manifest file
+
+      - name: Push changes
+        run: |
+          cd argocd
+          git push https://${{ secrets.GH_TOKEN }}@github.com/aitdevops/argocd.git main  # Pushes the changes back to the ArgoCD repository
