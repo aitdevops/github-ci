@@ -1,8 +1,7 @@
 name: azure-backend
 
 on:
-  repository_dispatch:
-    types: [backend_push]
+  workflow_dispatch:  # This allows manual triggering of the workflow
 
 permissions:
   id-token: write  # Required for Workload Identity Federation
