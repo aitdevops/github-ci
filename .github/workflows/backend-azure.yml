@@ -1,0 +1,50 @@
+name: Build and Push Backend Images
+
+on:
+  repository_dispatch:
+    types: [backend_push]
+
+permissions:
+  id-token: write  # Required for Workload Identity Federation
+  contents: read   # Necessary for actions/checkout and other read operations
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout backend code
+        uses: actions/checkout@v4
+        with:
+          repository: aitdevops/backend
+          token: ${{ secrets.GH_TOKEN }}
+          path: backend
+
+      - name: Login to Azure using OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set up Docker CLI
+        run: |
+          az acr login --name aitdevops  # Log in to Azure Container Registry
+
+      - name: Build and push approval-service image
+        run: |
+          IMAGE_TAG=$(date +%Y%m%d%H%M%S)-approval  # Generate a unique image tag based on the current date and time
+          docker build -t aitdevops.azurecr.io/approval-service:$IMAGE_TAG -f backend/approval-service/Dockerfile backend/approval-service
+          docker push aitdevops.azurecr.io/approval-service:$IMAGE_TAG
+
+      - name: Build and push auth-service image
+        run: |
+          IMAGE_TAG=$(date +%Y%m%d%H%M%S)-auth  # Generate a unique image tag based on the current date and time
+          docker build -t aitdevops.azurecr.io/auth-service:$IMAGE_TAG -f backend/auth-service/Dockerfile backend/auth-service
+          docker push aitdevops.azurecr.io/auth-service:$IMAGE_TAG
+
+      - name: Build and push user-service image
+        run: |
+          IMAGE_TAG=$(date +%Y%m%d%H%M%S)-user  # Generate a unique image tag based on the current date and time
+          docker build -t aitdevops.azurecr.io/user-service:$IMAGE_TAG -f backend/user-service/Dockerfile backend/user-service
+          docker push aitdevops.azurecr.io/user-service:$IMAGE_TAG
