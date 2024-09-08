@@ -1,4 +1,4 @@
-name: Build and Push Backend Images, Update Kubernetes Manifests
+name: gcp-backend
 
 on:
   repository_dispatch:

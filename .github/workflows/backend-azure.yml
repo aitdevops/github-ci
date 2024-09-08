@@ -1,4 +1,4 @@
-name: Build and Push Backend Images
+name: azure-backend
 
 on:
   repository_dispatch:
