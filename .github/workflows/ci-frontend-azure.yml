@@ -1,0 +1,37 @@
+name: Build and Push Frontend Image
+
+on:
+  workflow_dispatch:  # This allows manual triggering of the workflow
+
+permissions:
+  id-token: write  # Required for Workload Identity Federation
+  contents: read   # Necessary for actions/checkout and other read operations
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest  # The job will run on the latest version of Ubuntu
+
+    steps:
+      - name: Checkout frontend code
+        uses: actions/checkout@v4
+        with:
+          repository: aitdevops/frontend  # Checks out the frontend code from the specified repository
+          token: ${{ secrets.GH_TOKEN }}
+          path: frontend  # Clones the frontend repository into the 'frontend' directory
+
+      - name: Login to Azure using OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set up Docker CLI
+        run: |
+          az acr login --name aitdevops  # Log in to Azure Container Registry
+
+      - name: Build and push frontend image
+        run: |
+          IMAGE_TAG=$(date +%Y%m%d%H%M%S)  # Generate a unique image tag based on the current date and time
+          docker build -t aitdevops.azurecr.io/frontend:$IMAGE_TAG -f frontend/frontend/Dockerfile ./frontend/frontend  # Builds the Docker image for the frontend
+          docker push aitdevops.azurecr.io/frontend:$IMAGE_TAG  # Pushes the Docker image to Azure Container Registry
