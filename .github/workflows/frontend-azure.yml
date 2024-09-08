@@ -30,18 +30,21 @@ jobs:
         run: |
           az acr login --name aitdevops  # Log in to Azure Container Registry
 
+      - name: Generate image tag
+        id: image_tag
+        run: echo "IMAGE_TAG=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+
       - name: Build and push frontend image
         run: |
-          IMAGE_TAG=$(date +%Y%m%d%H%M%S)  # Generate a unique image tag based on the current date and time
-          docker build -t aitdevops.azurecr.io/frontend:$IMAGE_TAG -f frontend/frontend/Dockerfile ./frontend/frontend  # Builds the Docker image for the frontend
-          docker push aitdevops.azurecr.io/frontend:$IMAGE_TAG  # Pushes the Docker image to Azure Container Registry
+          docker build -t aitdevops.azurecr.io/frontend:${{ env.IMAGE_TAG }} -f frontend/frontend/Dockerfile ./frontend/frontend  # Builds the Docker image for the frontend
+          docker push aitdevops.azurecr.io/frontend:${{ env.IMAGE_TAG }}  # Pushes the Docker image to Azure Container Registry
 
       - name: Configure git
         run: |
           git config --global user.email "rajeevkoppisetti21@gmail.com"
           git config --global user.name "aitdevops"  # Configures Git with the user's name and email for committing changes
 
-      - name: Clone argocd repo
+      - name: Clone ArgoCD repo
         run: |
           git clone https://${{ secrets.GH_TOKEN }}@github.com/aitdevops/argocd.git  # Clones the ArgoCD repository
           cd argocd
@@ -50,10 +53,9 @@ jobs:
       - name: Update Kubernetes manifest file
         run: |
           cd argocd
-          IMAGE_TAG=$(date +%Y%m%d%H%M%S)  # Uses the generated image tag
-          sed -i 's|image:.*|image: "aitdevops.azurecr.io/frontend:'$IMAGE_TAG'"|g' azure/frontend/deployment.yaml  # Updates the Docker image tag in the Kubernetes manifest
+          sed -i 's|image:.*|image: "aitdevops.azurecr.io/frontend:${{ env.IMAGE_TAG }}"|g' azure/frontend/deployment.yaml  # Updates the Docker image tag in the Kubernetes manifest
           git add azure/frontend/deployment.yaml
-          git commit -m "Update frontend image to $IMAGE_TAG"  # Commits the changes to the manifest file
+          git commit -m "Update frontend image to ${{ env.IMAGE_TAG }}"  # Commits the changes to the manifest file
 
       - name: Push changes
         run: |

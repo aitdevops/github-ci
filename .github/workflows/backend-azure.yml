@@ -30,23 +30,24 @@ jobs:
         run: |
           az acr login --name aitdevops  # Log in to Azure Container Registry
 
+      - name: Generate image tag
+        id: image_tag
+        run: echo "IMAGE_TAG=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+
       - name: Build and push approval-service image
         run: |
-          IMAGE_TAG=$(date +%Y%m%d%H%M%S)-approval  # Generate a unique image tag based on the current date and time
-          docker build -t aitdevops.azurecr.io/approval-service:$IMAGE_TAG -f backend/approval-service/Dockerfile backend/approval-service
-          docker push aitdevops.azurecr.io/approval-service:$IMAGE_TAG
+          docker build -t aitdevops.azurecr.io/approval-service:${{ env.IMAGE_TAG }} -f backend/approval-service/Dockerfile backend/approval-service
+          docker push aitdevops.azurecr.io/approval-service:${{ env.IMAGE_TAG }}
 
       - name: Build and push auth-service image
         run: |
-          IMAGE_TAG=$(date +%Y%m%d%H%M%S)-auth  # Generate a unique image tag based on the current date and time
-          docker build -t aitdevops.azurecr.io/auth-service:$IMAGE_TAG -f backend/auth-service/Dockerfile backend/auth-service
-          docker push aitdevops.azurecr.io/auth-service:$IMAGE_TAG
+          docker build -t aitdevops.azurecr.io/auth-service:${{ env.IMAGE_TAG }} -f backend/auth-service/Dockerfile backend/auth-service
+          docker push aitdevops.azurecr.io/auth-service:${{ env.IMAGE_TAG }}
 
       - name: Build and push user-service image
         run: |
-          IMAGE_TAG=$(date +%Y%m%d%H%M%S)-user  # Generate a unique image tag based on the current date and time
-          docker build -t aitdevops.azurecr.io/user-service:$IMAGE_TAG -f backend/user-service/Dockerfile backend/user-service
-          docker push aitdevops.azurecr.io/user-service:$IMAGE_TAG
+          docker build -t aitdevops.azurecr.io/user-service:${{ env.IMAGE_TAG }} -f backend/user-service/Dockerfile backend/user-service
+          docker push aitdevops.azurecr.io/user-service:${{ env.IMAGE_TAG }}
 
       - name: Configure git
         run: |
@@ -62,26 +63,23 @@ jobs:
       - name: Update Kubernetes manifests for approval-service
         run: |
           cd argocd
-          IMAGE_TAG=$(date +%Y%m%d%H%M%S)-approval
-          sed -i 's|image:.*|image: "aitdevops.azurecr.io/approval-service:'$IMAGE_TAG'"|g' azure/backend/approval-service/deployment.yaml
+          sed -i 's|image:.*|image: "aitdevops.azurecr.io/approval-service:${{ env.IMAGE_TAG }}"|g' azure/backend/approval-service/deployment.yaml
           git add azure/backend/approval-service/deployment.yaml
-          git commit -m "Update approval-service image to $IMAGE_TAG"
+          git commit -m "Update approval-service image to ${{ env.IMAGE_TAG }}"
 
       - name: Update Kubernetes manifests for auth-service
         run: |
           cd argocd
-          IMAGE_TAG=$(date +%Y%m%d%H%M%S)-auth
-          sed -i 's|image:.*|image: "aitdevops.azurecr.io/auth-service:'$IMAGE_TAG'"|g' azure/backend/auth-service/deployment.yaml
+          sed -i 's|image:.*|image: "aitdevops.azurecr.io/auth-service:${{ env.IMAGE_TAG }}"|g' azure/backend/auth-service/deployment.yaml
           git add azure/backend/auth-service/deployment.yaml
-          git commit -m "Update auth-service image to $IMAGE_TAG"
+          git commit -m "Update auth-service image to ${{ env.IMAGE_TAG }}"
 
       - name: Update Kubernetes manifests for user-service
         run: |
           cd argocd
-          IMAGE_TAG=$(date +%Y%m%d%H%M%S)-user
-          sed -i 's|image:.*|image: "aitdevops.azurecr.io/user-service:'$IMAGE_TAG'"|g' azure/backend/user-service/deployment.yaml
+          sed -i 's|image:.*|image: "aitdevops.azurecr.io/user-service:${{ env.IMAGE_TAG }}"|g' azure/backend/user-service/deployment.yaml
           git add azure/backend/user-service/deployment.yaml
-          git commit -m "Update user-service image to $IMAGE_TAG"
+          git commit -m "Update user-service image to ${{ env.IMAGE_TAG }}"
 
       - name: Push changes
         run: |
