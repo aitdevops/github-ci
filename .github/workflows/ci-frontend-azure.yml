@@ -1,4 +1,4 @@
-name: Build and Push Frontend Image
+name: azure-frontend
 
 on:
   workflow_dispatch:  # This allows manual triggering of the workflow
